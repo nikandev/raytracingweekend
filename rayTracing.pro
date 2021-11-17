@@ -9,17 +9,23 @@ CONFIG += c++11
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 SOURCES += \
+    camera.cpp \
     hittable.cpp \
     main.cpp \
     mainwindow.cpp \
     ray.cpp \
-    sphere.cpp
+    renderer.cpp \
+    sphere.cpp \
+    utility.cpp
 
 HEADERS += \
+    camera.h \
     hittable.h \
     mainwindow.h \
     ray.h \
-    sphere.h
+    renderer.h \
+    sphere.h \
+    utility.h
 
 FORMS += \
     mainwindow.ui

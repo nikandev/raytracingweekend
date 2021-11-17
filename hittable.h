@@ -1,18 +1,18 @@
 #ifndef HITTABLE_H
 #define HITTABLE_H
 
-#include <QList>
 #include <QSharedPointer>
+#include <QVector3D>
 #include "ray.h"
 
 struct HitRecord
 {
-    point3 p;
-    vec3 normal;
+    QVector3D p;
+    QVector3D normal;
     double t;
     bool frontFace;
 
-    inline void setFaceNormal(const Ray& r, const vec3& outward_normal)
+    void setFaceNormal(const Ray& r, const QVector3D& outward_normal)
     {
         frontFace = Ray::dot(r.direction(), outward_normal) < 0;
         normal = frontFace ? outward_normal :-outward_normal;

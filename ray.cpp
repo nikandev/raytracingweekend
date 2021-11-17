@@ -1,11 +1,11 @@
 #include "ray.h"
 
-Ray::Ray(const point3& origin, const QVector3D& direction)
+Ray::Ray(const QVector3D& origin, const QVector3D& direction)
     : _orig(origin), _dir(direction)
 {
 }
 
-double Ray::dot(const vec3 &u, const vec3 &v)
+double Ray::dot(const QVector3D &u, const QVector3D &v)
 {
     return u.x() * v.x()
             + u.y() * v.y()
