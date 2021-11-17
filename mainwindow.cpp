@@ -1,6 +1,5 @@
 #include <QGraphicsPixmapItem>
 #include <QGraphicsScene>
-#include <QPixmap>
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 #include "renderer.h"
@@ -10,7 +9,6 @@
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::MainWindow),
-      _image(nullptr),
       _camera(nullptr),
       _world(),
       _origin(nullptr),
@@ -44,6 +42,10 @@ void MainWindow::buildWorld()
 
 void MainWindow::render()
 {
+    const auto aspectRatio = 16.0 / 9.0;
+    const int imageHeight = static_cast<int>(_imageWidth / aspectRatio);
+    ui->progressBar->setMaximum(imageHeight);
+
     Renderer* renderer = new Renderer(_imageWidth, _camera, &_world, this);
     connect(renderer, &Renderer::updateProgressBar, this->ui->progressBar, &QProgressBar::setValue);
     connect(renderer, &Renderer::imageDone, this, &MainWindow::showImage);
@@ -55,9 +57,15 @@ void MainWindow::render()
 void MainWindow::showImage(QImage image)
 {
     QGraphicsScene* scene = new QGraphicsScene();
-    QGraphicsPixmapItem* item = new QGraphicsPixmapItem(QPixmap::fromImage(image));
+    bufferizePixmap(QPixmap::fromImage(image));
+    QGraphicsPixmapItem* item = new QGraphicsPixmapItem(_imagePixmap);
     scene->addItem(item);
     ui->graphicsView->setScene(scene);
+}
+
+void MainWindow::bufferizePixmap(QPixmap pixmap)
+{
+    _imagePixmap = pixmap;
 }
 
 double MainWindow::hitsSphere(const QVector3D& center, double radius, const Ray& r)
@@ -80,7 +88,7 @@ double MainWindow::hitsSphere(const QVector3D& center, double radius, const Ray&
 
 void MainWindow::on_savePushButton_clicked()
 {
-    _image->save("exported", "PNG");
+    _imagePixmap.save("exported.png", "PNG");
 }
 
 void MainWindow::on_renderPushButton_clicked()
@@ -91,8 +99,4 @@ void MainWindow::on_renderPushButton_clicked()
 void MainWindow::on_widthSpinBox_valueChanged(int arg1)
 {
     _imageWidth = arg1;
-    const auto aspectRatio = 16.0 / 9.0;
-    const int imageHeight = static_cast<int>(_imageWidth / aspectRatio);
-    ui->progressBar->setMaximum(imageHeight);
 }
-

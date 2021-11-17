@@ -5,6 +5,7 @@
 #include <QRgb>
 #include <QVector3D>
 #include <QImage>
+#include <QPixmap>
 #include "camera.h"
 #include "hittable.h"
 
@@ -20,7 +21,7 @@ class MainWindow : public QMainWindow
         ~MainWindow();
     private:
         Ui::MainWindow* ui;
-        QImage* _image;
+        QPixmap _imagePixmap;
         Camera* _camera;
         HittableList _world;
         QVector3D* _origin;
@@ -29,6 +30,7 @@ class MainWindow : public QMainWindow
         void buildWorld();
         void render();
         static double hitsSphere(const QVector3D& center, double radius, const Ray& r);
+        void bufferizePixmap(QPixmap pixmap);
     private slots:
         void showImage(QImage image);
         void on_savePushButton_clicked();

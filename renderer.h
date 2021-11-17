@@ -22,7 +22,7 @@ class Renderer : public QThread
         Camera* _camera;
         HittableList* _world;
         QRgb colorValue(QVector3D pixelColor, int samplesPerPixel);
-        static QVector3D rayColor(const Ray& r, const Hittable& world);
+        static QVector3D rayColor(const Ray& r, const Hittable& world, int depth);
 };
 
 #endif // RENDERER_H

@@ -1,5 +1,6 @@
 #include "renderer.h"
 #include "utility.h"
+#include "QtMath"
 
 Renderer::Renderer(int imageWidth, Camera* camera, HittableList* world, QObject* parent)
     :QThread(parent),
@@ -13,7 +14,8 @@ void Renderer::run()
 {
     const auto aspectRatio = 16.0 / 9.0;
     const int imageHeight = static_cast<int>(_imageWidth / aspectRatio);
-    const int samplesPerPixel = 100;
+    const int samplesPerPixel = 10; //Very heavy effect on operation time
+    const int maxDepth = 50;
 
     QImage* image = new QImage(_imageWidth, imageHeight, QImage::Format_RGB32);
 
@@ -25,12 +27,12 @@ void Renderer::run()
         {
             QVector3D pixelColor(0, 0, 0);
 
-             for (int s = 0; s < samplesPerPixel; s++) //Very heavy operation
+             for (int s = 0; s < samplesPerPixel; s++)
              {
                  auto u = (i + Utility::randomDouble()) / (_imageWidth - 1);
                  auto v = (j + Utility::randomDouble()) / (imageHeight - 1);
                  Ray r = _camera->getRay(u, v);
-                 pixelColor += rayColor(r, *_world);
+                 pixelColor += rayColor(r, *_world, maxDepth);
              }
 
             image->setPixel(i, imageHeight - 1 - j, colorValue(pixelColor, samplesPerPixel));
@@ -51,6 +53,11 @@ QRgb Renderer::colorValue(QVector3D pixelColor, int samplesPerPixel)
     g *= scale;
     b *= scale;
 
+
+//    r *= qSqrt(scale * r); //gamma-correct for gamma=2.0.
+//    g *= qSqrt(scale * g);
+//    b *= qSqrt(scale * b);
+
     int ir = static_cast<int>(256  * Utility::clamp(r, 0.0, 0.999));
     int ig = static_cast<int>(256  * Utility::clamp(g, 0.0, 0.999));
     int ib = static_cast<int>(256  * Utility::clamp(b, 0.0, 0.999));
@@ -58,13 +65,21 @@ QRgb Renderer::colorValue(QVector3D pixelColor, int samplesPerPixel)
     return qRgb(ir, ig, ib);
 }
 
-QVector3D Renderer::rayColor(const Ray& r, const Hittable& world)
+QVector3D Renderer::rayColor(const Ray& r, const Hittable& world, int depth)
 {
     HitRecord rec;
 
-    if (world.hit(r, 0, infinity, rec))
+    if (depth <= 0)
     {
-        return 0.5 * (rec.normal + QVector3D(1,1,1));
+            return QVector3D(0,0,0);
+    }
+
+    const double shadowAcneFixCoefficient = 0.001;
+
+    if (world.hit(r, shadowAcneFixCoefficient, infinity, rec))
+    {
+        QVector3D target = rec.p + rec.normal + Utility::randomUnitVector();
+        return 0.5 * rayColor(Ray(rec.p, target - rec.p), world, depth-1);
     }
 
     QVector3D unitDirection = Utility::unitVector(r.direction());
