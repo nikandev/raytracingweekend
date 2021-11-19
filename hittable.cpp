@@ -11,7 +11,7 @@ bool HittableList::hit(const Ray& r, double t_min, double t_max, HitRecord& rec)
         if (object->hit(r, t_min, closestSoFar, temp))
         {
             hitAnything = true;
-            closestSoFar = temp.t;
+            closestSoFar = temp.inRange();
             rec = temp;
         }
     }

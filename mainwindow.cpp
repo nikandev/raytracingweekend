@@ -1,10 +1,13 @@
 #include <QGraphicsPixmapItem>
 #include <QGraphicsScene>
+#include <QSharedPointer>
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 #include "renderer.h"
 #include "sphere.h"
 #include "utility.h"
+#include "materialmetal.h"
+#include "lambertian.h"
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -34,10 +37,32 @@ void MainWindow::buildCamera()
 
 void MainWindow::buildWorld()
 {
-    QVector3D p = QVector3D(0,0,-1);
-    _world.add(QSharedPointer<Sphere>::create(p, 0.5));
-    QVector3D p1 = QVector3D(0,-100.5,-1);
-    _world.add(QSharedPointer<Sphere>::create(p1, 100));
+    QVector3D groundColor(0.8, 0.8, 0.0);
+    AbstractMaterial* groundMaterial = new Lambertian(groundColor);
+
+    QVector3D centerColor(0.7, 0.3, 0.3);
+    AbstractMaterial* centerMaterial = new Lambertian(centerColor);
+
+    QVector3D leftColor(0.8, 0.8, 0.8);
+    AbstractMaterial* leftMaterial = new MaterialMetal(leftColor);
+
+    QVector3D rightColor(0.8, 0.6, 0.2);
+    AbstractMaterial* rightMaterial = new MaterialMetal(rightColor);
+
+    QVector3D groundCenter(0.0, -100.5, -1.0);
+    QVector3D centerCenter(0.0,    0.0, -1.0);
+    QVector3D leftCenter( -1.0,    0.0, -1.0);
+    QVector3D rightCenter( 1.0,    0.0, -1.0);
+
+    Hittable* ground(new Sphere(groundCenter, 100.0, groundMaterial));
+    Hittable* center(new Sphere(centerCenter, 0.5, centerMaterial));
+    Hittable* left(new Sphere(leftCenter, 0.5, leftMaterial));
+    Hittable* right(new Sphere(rightCenter, 0.5, rightMaterial));
+
+    _world.add(ground);
+    _world.add(center);
+    _world.add(left);
+    _world.add(right);
 }
 
 void MainWindow::render()
@@ -72,7 +97,7 @@ double MainWindow::hitsSphere(const QVector3D& center, double radius, const Ray&
 {
     QVector3D oc = r.origin() - center;
     auto a = r.direction().lengthSquared();
-    auto halfB = Ray::dot(oc, r.direction());
+    auto halfB = Utility::dot(oc, r.direction());
     auto c = oc.lengthSquared() - radius*radius;
     auto discriminant = halfB * halfB - a * c;
 

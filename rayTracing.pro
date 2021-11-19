@@ -10,9 +10,13 @@ CONFIG += c++11
 
 SOURCES += \
     camera.cpp \
+    hitrecord.cpp \
     hittable.cpp \
+    lambertian.cpp \
     main.cpp \
     mainwindow.cpp \
+    material.cpp \
+    materialmetal.cpp \
     ray.cpp \
     renderer.cpp \
     sphere.cpp \
@@ -20,8 +24,13 @@ SOURCES += \
 
 HEADERS += \
     camera.h \
+    common.h \
+    hitrecord.h \
     hittable.h \
+    lambertian.h \
     mainwindow.h \
+    material.h \
+    materialmetal.h \
     ray.h \
     renderer.h \
     sphere.h \

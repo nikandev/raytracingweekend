@@ -16,6 +16,9 @@ class Utility
 
         static double randomDouble();
         static double clamp(double x, double min, double max);
+        static bool nearZero(const QVector3D& vec);
+        static double dot(const QVector3D& u, const QVector3D& v);
+        static QVector3D reflect(const QVector3D& falling, const QVector3D& unit);
 
         inline static QVector3D randomVector() { return QVector3D(randomDouble(), randomDouble(), randomDouble()); }
         inline static QVector3D randomVector(double min, double max) { return QVector3D(randomDoubleBounded(min, max), randomDoubleBounded(min, max), randomDoubleBounded(min, max)); }

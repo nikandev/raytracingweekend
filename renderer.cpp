@@ -1,6 +1,8 @@
+#include <QtMath>
+#include "material.h"
 #include "renderer.h"
 #include "utility.h"
-#include "QtMath"
+#include "ray.h"
 
 Renderer::Renderer(int imageWidth, Camera* camera, HittableList* world, QObject* parent)
     :QThread(parent),
@@ -69,17 +71,28 @@ QVector3D Renderer::rayColor(const Ray& r, const Hittable& world, int depth)
 {
     HitRecord rec;
 
+    QVector3D nullColor(0, 0, 0);
+
     if (depth <= 0)
     {
-            return QVector3D(0,0,0);
+            return nullColor;
     }
 
     const double shadowAcneFixCoefficient = 0.001;
 
     if (world.hit(r, shadowAcneFixCoefficient, infinity, rec))
     {
-        QVector3D target = rec.p + rec.normal + Utility::randomUnitVector();
-        return 0.5 * rayColor(Ray(rec.p, target - rec.p), world, depth-1);
+        Ray scattered;
+        QVector3D colorAttenuation;
+
+        AbstractMaterial* material = rec.material();
+
+        if (material->scatter(r, rec, colorAttenuation, scattered))
+        {
+            return colorAttenuation * rayColor(scattered, world, depth-1);
+        }
+
+        return nullColor;
     }
 
     QVector3D unitDirection = Utility::unitVector(r.direction());
