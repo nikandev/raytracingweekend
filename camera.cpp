@@ -1,19 +1,30 @@
 #include "camera.h"
+#include "utility.h"
 
-Camera::Camera()
+Camera::Camera(QVector3D lookFrom, QVector3D lookAt, QVector3D viewUp, double vertFov, double aspectRatio, double aperture, double focusDistance)
 {
-    auto aspect_ratio = 16.0 / 9.0;
-    auto viewport_height = 2.0;
-    auto viewport_width = aspect_ratio * viewport_height;
-    auto focal_length = 1.0;
+    auto theta = Utility::degreesToRadians(vertFov);
+    auto h = tan(theta/2);
 
-    origin = QVector3D(0, 0, 0);
-    horizontal = QVector3D(viewport_width, 0.0, 0.0);
-    vertical = QVector3D(0.0, viewport_height, 0.0);
-    lower_left_corner = origin - horizontal/2 - vertical/2 - QVector3D(0, 0, focal_length);
+    auto viewportHeight = 2.0 * h;
+    auto viewportWidth = aspectRatio * viewportHeight;
+
+    auto w = Utility::unitVector(lookFrom - lookAt);
+    auto u = Utility::unitVector(Utility::cross(viewUp, w));
+    auto v = Utility::cross(w, u);
+
+    _origin = lookFrom;
+    _horizontal = focusDistance * viewportWidth * u;
+    _vertical = focusDistance * viewportHeight * v;
+    _lowerLeftCorner = _origin - _horizontal/2 - _vertical/2 - (focusDistance * w);
+
+    _lensRadius = aperture / 2;
 }
 
 Ray Camera::getRay(double u, double v) const
 {
-    return Ray(origin, lower_left_corner + u*horizontal + v*vertical - origin);
+    QVector3D random = _lensRadius * Utility::randomInUnitDisk();
+    const double o = u * random.x() + v * random.y();
+    QVector3D offset(o, o, o); //looks wrong
+    return Ray(_origin + offset, _lowerLeftCorner + u*_horizontal + v*_vertical - _origin - offset);
 }

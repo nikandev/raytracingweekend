@@ -7,5 +7,5 @@ bool MaterialMetal::scatter(const Ray& in, const HitRecord& rec, QVector3D& atte
     QVector3D reflected = Utility::reflect(Utility::unitVector(in.direction()), rec.normal());
     scattered = Ray(rec.pointsInRange(), reflected);
     attenuation = _albedo;
-    return (Utility::dot(scattered.direction(), rec.normal()) > 0);
+    return (Utility::dot(scattered.direction(), reflected + (_fuzz * Utility::randomInUnitSphere())));
 }

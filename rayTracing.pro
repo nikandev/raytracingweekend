@@ -10,6 +10,7 @@ CONFIG += c++11
 
 SOURCES += \
     camera.cpp \
+    dielectric.cpp \
     hitrecord.cpp \
     hittable.cpp \
     lambertian.cpp \
@@ -25,6 +26,7 @@ SOURCES += \
 HEADERS += \
     camera.h \
     common.h \
+    dielectric.h \
     hitrecord.h \
     hittable.h \
     lambertian.h \

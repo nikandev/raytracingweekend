@@ -8,6 +8,7 @@
 #include "utility.h"
 #include "materialmetal.h"
 #include "lambertian.h"
+#include "dielectric.h"
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -32,31 +33,42 @@ MainWindow::~MainWindow()
 
 void MainWindow::buildCamera()
 {
-    _camera = new Camera();
+    const double vertFov = 60;
+    const double aspectRatio = 16.0 / 9.0;
+    const double aperture = 2.0;
+
+    QVector3D lookFrom(-2,2,1);
+    QVector3D lookAt(0,0,-1);
+    QVector3D viewUp(0,1,0);
+
+    const double distanceToFocus = (lookFrom-lookAt).length();
+
+    _camera = new Camera(lookFrom, lookAt, viewUp, vertFov, aspectRatio, aperture, distanceToFocus);
 }
 
 void MainWindow::buildWorld()
 {
     QVector3D groundColor(0.8, 0.8, 0.0);
     AbstractMaterial* groundMaterial = new Lambertian(groundColor);
+    QVector3D groundCenter(0.0, -100.5, -1.0);
+    Hittable* ground(new Sphere(groundCenter, 100.0, groundMaterial));
 
-    QVector3D centerColor(0.7, 0.3, 0.3);
-    AbstractMaterial* centerMaterial = new Lambertian(centerColor);
+    double refractionIndex = 1.5;
+    AbstractMaterial* centerMaterial = new Dielectric(refractionIndex);
+    QVector3D centerCenter(0.0,    0.0, -1.0);
+    double centerRadius = 0.5;
+    Hittable* center(new Sphere(centerCenter, centerRadius, centerMaterial));
 
     QVector3D leftColor(0.8, 0.8, 0.8);
-    AbstractMaterial* leftMaterial = new MaterialMetal(leftColor);
+    double fuzzCoefficientLeft = 0.0;
+    AbstractMaterial* leftMaterial = new MaterialMetal(leftColor, fuzzCoefficientLeft);
+    QVector3D leftCenter( -1.0,    0.0, -1.0);
+    Hittable* left(new Sphere(leftCenter, 0.5, leftMaterial));
 
     QVector3D rightColor(0.8, 0.6, 0.2);
-    AbstractMaterial* rightMaterial = new MaterialMetal(rightColor);
-
-    QVector3D groundCenter(0.0, -100.5, -1.0);
-    QVector3D centerCenter(0.0,    0.0, -1.0);
-    QVector3D leftCenter( -1.0,    0.0, -1.0);
+    double fuzzCoefficientRight = 1.0;
+    AbstractMaterial* rightMaterial = new MaterialMetal(rightColor, fuzzCoefficientRight);
     QVector3D rightCenter( 1.0,    0.0, -1.0);
-
-    Hittable* ground(new Sphere(groundCenter, 100.0, groundMaterial));
-    Hittable* center(new Sphere(centerCenter, 0.5, centerMaterial));
-    Hittable* left(new Sphere(leftCenter, 0.5, leftMaterial));
     Hittable* right(new Sphere(rightCenter, 0.5, rightMaterial));
 
     _world.add(ground);

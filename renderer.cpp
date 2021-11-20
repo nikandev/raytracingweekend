@@ -16,7 +16,7 @@ void Renderer::run()
 {
     const auto aspectRatio = 16.0 / 9.0;
     const int imageHeight = static_cast<int>(_imageWidth / aspectRatio);
-    const int samplesPerPixel = 10; //Very heavy effect on operation time
+    const int samplesPerPixel = 20; //Very heavy effect on operation time
     const int maxDepth = 50;
 
     QImage* image = new QImage(_imageWidth, imageHeight, QImage::Format_RGB32);

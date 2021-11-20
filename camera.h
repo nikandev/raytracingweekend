@@ -7,13 +7,14 @@
 class Camera
 {
     public:
-        Camera();
+        Camera(QVector3D lookFrom, QVector3D lookAt, QVector3D viewUp, double vertFov, double aspectRatio, double aperture, double focusDistance);
         Ray getRay(double u, double v) const;
     private:
-        QVector3D origin;
-        QVector3D lower_left_corner;
-        QVector3D horizontal;
-        QVector3D vertical;
+        QVector3D _origin;
+        QVector3D _lowerLeftCorner;
+        QVector3D _horizontal;
+        QVector3D _vertical;
+        double _lensRadius;
 };
 
 #endif // CAMERA_H
