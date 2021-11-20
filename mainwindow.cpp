@@ -6,7 +6,7 @@
 #include "renderer.h"
 #include "sphere.h"
 #include "utility.h"
-#include "materialmetal.h"
+#include "metal.h"
 #include "lambertian.h"
 #include "dielectric.h"
 
@@ -35,46 +35,93 @@ void MainWindow::buildCamera()
 {
     const double vertFov = 60;
     const double aspectRatio = 16.0 / 9.0;
-    const double aperture = 2.0;
+    const double aperture = 0.1;
 
-    QVector3D lookFrom(-2,2,1);
-    QVector3D lookAt(0,0,-1);
+    QVector3D lookFrom(13,2,3);
+    QVector3D lookAt(0,0,0);
     QVector3D viewUp(0,1,0);
 
-    const double distanceToFocus = (lookFrom-lookAt).length();
+    const double distanceToFocus = 10; //(lookFrom-lookAt).length();
 
     _camera = new Camera(lookFrom, lookAt, viewUp, vertFov, aspectRatio, aperture, distanceToFocus);
 }
 
 void MainWindow::buildWorld()
 {
-    QVector3D groundColor(0.8, 0.8, 0.0);
+    QVector3D groundColor(0.5, 0.5, 0.5); //Todo: QRgb
     AbstractMaterial* groundMaterial = new Lambertian(groundColor);
-    QVector3D groundCenter(0.0, -100.5, -1.0);
-    Hittable* ground(new Sphere(groundCenter, 100.0, groundMaterial));
-
-    double refractionIndex = 1.5;
-    AbstractMaterial* centerMaterial = new Dielectric(refractionIndex);
-    QVector3D centerCenter(0.0,    0.0, -1.0);
-    double centerRadius = 0.5;
-    Hittable* center(new Sphere(centerCenter, centerRadius, centerMaterial));
-
-    QVector3D leftColor(0.8, 0.8, 0.8);
-    double fuzzCoefficientLeft = 0.0;
-    AbstractMaterial* leftMaterial = new MaterialMetal(leftColor, fuzzCoefficientLeft);
-    QVector3D leftCenter( -1.0,    0.0, -1.0);
-    Hittable* left(new Sphere(leftCenter, 0.5, leftMaterial));
-
-    QVector3D rightColor(0.8, 0.6, 0.2);
-    double fuzzCoefficientRight = 1.0;
-    AbstractMaterial* rightMaterial = new MaterialMetal(rightColor, fuzzCoefficientRight);
-    QVector3D rightCenter( 1.0,    0.0, -1.0);
-    Hittable* right(new Sphere(rightCenter, 0.5, rightMaterial));
+    QVector3D groundCenter(0.0, -1000.0, 0.0);
+    Hittable* ground(new Sphere(groundCenter, 1000.0, groundMaterial));
 
     _world.add(ground);
-    _world.add(center);
-    _world.add(left);
-    _world.add(right);
+
+    buildRandomSpheres();
+    buildBigSpheres();
+}
+
+void MainWindow::buildRandomSpheres()
+{
+    double radius = 0.2;
+
+    for (int i = -11; i < 11; i++)
+    {
+        for (int j = -11; j < 11; j++)
+        {
+            auto materialRandomizer = Utility::randomDouble();
+            QVector3D center(i + 0.9*Utility::randomDouble(), 0.2, j + 0.9*Utility::randomDouble());
+
+            if ((center - QVector3D(4, 0.2, 0)).length() > 0.9)
+            {
+                AbstractMaterial* sphereMaterial = nullptr;
+
+                if (materialRandomizer < 0.8)
+                {
+                    // diffuse
+                    auto albedo = Utility::randomVector() * Utility::randomVector();
+                    sphereMaterial = new Lambertian(albedo);
+                    Sphere* s = new Sphere(center, radius, sphereMaterial);
+                    _world.add(s);
+
+                }
+                else if (materialRandomizer < 0.95)
+                {
+                    // metal
+                    auto albedo = Utility::randomVector(0.5, 1);
+                    auto fuzz = Utility::randomDoubleBounded(0, 0.5);
+                    sphereMaterial = new Metal(albedo, fuzz);
+                    Sphere* s = new Sphere(center, radius, sphereMaterial);
+                    _world.add(s);
+                }
+                else
+                {
+                    // glass
+                    sphereMaterial = new Dielectric(1.5);
+                    Sphere* s = new Sphere(center, radius, sphereMaterial);
+                    _world.add(s);
+                }
+            }
+        }
+    }
+}
+
+void MainWindow::buildBigSpheres()
+{
+    const double radius = 1.0;
+
+    QVector3D center(0, 1, 0);
+    Sphere* s = new Sphere(center, 1.0, new Dielectric(1.5));
+    _world.add(s);
+
+    QVector3D color(0.4, 0.2, 0.1);
+    QVector3D center2(-4, 1, 0);
+    Sphere* s1 = new Sphere(center2, radius, new Lambertian(color));
+    _world.add(s1);
+
+    QVector3D color2(0.7, 0.6, 0.5);
+    const double fuzz = 0.0;
+    QVector3D center3(4, 1, 0);
+    Sphere* s2 = new Sphere(center3, radius, new Metal(color2, fuzz));
+    _world.add(s2);
 }
 
 void MainWindow::render()

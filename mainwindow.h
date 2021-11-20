@@ -31,6 +31,8 @@ class MainWindow : public QMainWindow
         void render();
         static double hitsSphere(const QVector3D& center, double radius, const Ray& r);
         void bufferizePixmap(QPixmap pixmap);
+        void buildRandomSpheres();
+        void buildBigSpheres();
     private slots:
         void showImage(QImage image);
         void on_savePushButton_clicked();

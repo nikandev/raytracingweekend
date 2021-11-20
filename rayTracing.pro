@@ -17,7 +17,7 @@ SOURCES += \
     main.cpp \
     mainwindow.cpp \
     material.cpp \
-    materialmetal.cpp \
+    metal.cpp \
     ray.cpp \
     renderer.cpp \
     sphere.cpp \
@@ -32,7 +32,7 @@ HEADERS += \
     lambertian.h \
     mainwindow.h \
     material.h \
-    materialmetal.h \
+    metal.h \
     ray.h \
     renderer.h \
     sphere.h \
